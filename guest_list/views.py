@@ -151,20 +151,24 @@ def send_qr_to_all(request):
             for guest in guests:
                 splited_email = guest.email.split('@')[0]
                 send_qr_code_email(
-                    subject='Your Fintech Week Program Registration QR Code',
+                    subject='Your Fintech Week Event Access QR Code',
                     body_text='',
                     body_html=f'''
-                        <html>
+                         <html>
                             <body style="font-size: 14px">
-                                <img src="cid:logo_image" alt="Fintech-Logo" style="display: block; margin: 0 auto; width: 120px;"/>
-
                                 <h4>Dear {guest.first_name},</h4>
                                 <p>Thanks for registering to attend Nigeria Fintech Week 2024!
-                                We are absolutely thrilled to host you from the 6th - 8th of October 2024.</p>
+                                We are absolutely thrilled to host you from the 8th - 10th of October 2024 at <b>Landmark Event Centre, </b>
+                                4, Water Corporation Road, Victoria Island, Lagos, Nigeria.</p>
                                 <p>Kindly find below the QR Code that grants you access to the event venue.</p>
-                                <img src="cid:qr_code" alt="QR" style="display: block; margin: 0 auto; width: 130px;"/>
-                                <p style="text-align: center">{guest.registration_code}</p>
-                                <h5 style="text-align: center;">Do keep this code handy to fast track your entry.</h5>
+                               <div style="text-align: center">
+                                    <div style="display: inline-block; text-align: center;">
+                                        <img src="cid:qr_code" alt="QR" style="width: 100px;" />
+                                        <p>{guest.registration_code}</p>
+                                    </div>
+                                    <img src="cid:logo_image" alt="Fintech-Logo" style="display: inline-block; width: 100px; margin-left: 20px; margin-bottom: 45px;"/>
+                                </div>
+                                <h5 style="text-align: center">Do keep this code handy to fast track your entry.</h5>
                             </body>
                         </html>
                     ''',
@@ -228,10 +232,10 @@ def import_guest_list(request):
             return JsonResponse({'message': 'Something went wrong, try again.', 'status': 400})
 
 def export_to_excel(request):
-    guests = Guest.objects.all().values('first_name', 'last_name', 'email', 'status')
+    guests = Guest.objects.all().values('first_name', 'last_name', 'email', 'status', 'registration_code')
 
     df = pd.DataFrame(list(guests))
-    df.columns = ['First Name', 'Last Name', 'Email', 'Status']
+    df.columns = ['First Name', 'Last Name', 'Email', 'Status', 'Registration Code']
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename=guests_list.xlsx'
     
@@ -240,10 +244,10 @@ def export_to_excel(request):
     return response
 
 def export_not_notified_to_excel(request):
-    guests = Guest.objects.filter(status='not-sent').all().values('first_name', 'last_name', 'email', 'status')
+    guests = Guest.objects.filter(status='not-sent').all().values('first_name', 'last_name', 'email', 'status', 'registration_code')
 
     df = pd.DataFrame(list(guests))
-    df.columns = ['First Name', 'Last Name', 'Email', 'Status']
+    df.columns = ['First Name', 'Last Name', 'Email', 'Status', 'Registration Code']
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename=guests_list.xlsx'
     
@@ -252,10 +256,10 @@ def export_not_notified_to_excel(request):
     return response
 
 def export_notified_to_excel(request):
-    guests = Guest.objects.filter(status='sent').all().values('first_name', 'last_name', 'email', 'status')
+    guests = Guest.objects.filter(status='sent').all().values('first_name', 'last_name', 'email', 'status', 'registration_code')
 
     df = pd.DataFrame(list(guests))
-    df.columns = ['First Name', 'Last Name', 'Email', 'Status']
+    df.columns = ['First Name', 'Last Name', 'Email', 'Status', 'Registration Code']
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename=guests_list.xlsx'
     
