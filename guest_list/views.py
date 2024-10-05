@@ -133,7 +133,7 @@ def send_qr_to_one(request):
                     ''',
                     from_email=config('DEFAULT_FROM_EMAIL'),
                     to_email=guest.email,
-                    image_path=os.path.join(settings.BASE_DIR, 'guest_list', 'static', 'qr_codes', f'{splited_email}.png'),
+                    image_path=os.path.join(settings.BASE_DIR, 'guest_list', 'static', 'qr_codes', f'{guest.first_name}_{splited_email}.png'),
                     logo_path=os.path.join(settings.BASE_DIR, 'guest_list', 'static', 'img', 'logo.png'),
                 )
 
@@ -174,7 +174,7 @@ def send_qr_to_all(request):
                     ''',
                     from_email=config('DEFAULT_FROM_EMAIL'),
                     to_email=guest.email,
-                    image_path=os.path.join(settings.BASE_DIR, 'guest_list', 'static', 'qr_codes', f'{splited_email}.png'),
+                    image_path=os.path.join(settings.BASE_DIR, 'guest_list', 'static', 'qr_codes', f'{guest.first_name}_{splited_email}.png'),
                     logo_path=os.path.join(settings.BASE_DIR, 'guest_list', 'static', 'img', 'logo.png'),
                 )
                 guest.status = 'sent'
@@ -192,9 +192,11 @@ def import_guest_list(request):
             sheet = wb.active
             
             for row in sheet.iter_rows(min_row=2, values_only=True):
-                first_name, last_name, email = row
 
-                if not Guest.objects.filter(email=email).exists():
+                first_name, last_name, email = row
+                
+                if email:
+                    # if not Guest.objects.filter(email=email).exists():
                     splited_email = email.split('@')[0]
 
                     # Generate a QR code
@@ -214,11 +216,11 @@ def import_guest_list(request):
                     
                     # Save QR code to a directory
                     save_dir = os.path.join('guest_list/static/qr_codes')
-                    qr_code_filename = f"{splited_email}.png"
+                    qr_code_filename = f"{first_name}_{splited_email}.png"
                     qr_code_path = os.path.join(save_dir, qr_code_filename)
                     qr_image.save(qr_code_path)
-                
-                    # Create a Guest instance and save to database
+                    
+                        # Create a Guest instance and save to database
                     Guest.objects.create(
                         first_name=first_name,
                         last_name=last_name,
@@ -226,7 +228,12 @@ def import_guest_list(request):
                         qr_code_path=qr_code_path,
                         registration_code=generate_random_string(9)
                     )
-                print(f"User with email <{email}> already exist. Skipping it.")
+
+                    print(f"Inserted {email}")
+                    # else:
+                    #     print(f"<{email}> already exist. Skipping it.")
+                else:
+                    print("Email cannot be empty")
             return JsonResponse({'message': 'File imported and processed successfully.', 'status': 200}) 
         except Exception as e:
             return JsonResponse({'message': 'Something went wrong, try again.', 'status': 400})
@@ -266,3 +273,4 @@ def export_notified_to_excel(request):
     df.to_excel(response, index=False)
 
     return response
+
