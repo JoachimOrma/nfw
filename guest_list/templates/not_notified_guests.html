@@ -1,0 +1,90 @@
+{% extends 'dashboard.html' %}
+{% block hero %}{% endblock hero %}
+{% block guests %}
+    
+    <div class="row">
+
+        <div class="col-md-12">
+        <div class="card card-round">
+            <div class="card-header">
+            <div class="card-head-row card-tools-still-right">
+                <h4 class="card-title">Not Notified Guest List</h4>
+
+                <div class="card-tools" style="display: flex; align-items: center;">
+                    <form action="{% url 'send_qr_to_all' %}" method="post" class="me-5" id="sendQRCodeForm">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-primary" id="sendQRCode"> Send QR Code To All Guest </i> </button>
+                    </form>
+                    <button
+                      class="btn btn-icon btn-link btn-primary btn-xs btn-refresh-card"
+                      onclick=`window.location.href="{% url 'dashboard' %}"`;
+                    >
+                      <span class="fa fa-sync-alt"></span>
+                    </button>
+                    <div class="dropdown">
+                    <button
+                        class="btn btn-icon btn-clean me-0"
+                        type="button"
+                        id="dropdownMenuButton"
+                        data-bs-toggle="dropdown"
+                        aria-haspopup="true"
+                        aria-expanded="false"
+                    >
+                        <i class="fas fa-ellipsis-h"></i>
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <a class="dropdown-item" href="{% url 'export_not_notified_to_excel' %}">Export to EXCEL</a>
+                    </div>
+                    </div>
+                </div>
+            </div>
+
+            <p class="card-category">
+                List of all Guests that have not receieved QR code.
+            </p>
+            </div>
+            <div class="card-body p-0 pb-3">
+                <div class="table-responsive">
+                {% if not_notified_guests %}
+                    
+                <div class="container-fluid">       
+                    <table class="table bg-light myTable" id="guestTable">
+                        <thead class="thead-light">
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">First Name</th>
+                            <th scope="col">Last Name</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Send QR</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for guest in not_notified_guests %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <th>{{ guest.first_name }}</th>
+                            <th>{{ guest.last_name }}</th>
+                            <td>{{ guest.email }}</td>
+                            <td><span class="badge badge-danger">Not Sent</span></td>
+                            <td><button class="btn btn-primary btn-sm sendQR" data-id="{{ guest.id }}"> Send</button></td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                    
+                {% else %}
+                <div class="row my-5" style="padding: 50px 0">
+                    <h5 class="text-center">This list is empty.</h5>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        </div>
+        </div>
+
+    </div>
+    
+{% endblock guests %}
+

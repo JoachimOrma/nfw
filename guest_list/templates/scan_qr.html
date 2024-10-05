@@ -1,0 +1,46 @@
+{% extends 'dashboard.html' %}
+{% block hero %}{% endblock hero %}
+{% block guests %}
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card card-round">
+                <div class="card-header">
+                    <h3>Scan QR Code</h3>
+                </div>
+                <div class="card-body d-flex justify-content-center p-5">
+                    <form method="POST">
+                        <input type="hidden" id="image_data" name="image_data">
+                        <button type="button" class="btn btn-primary"  onclick="scanQRCode()">Scan QR Code</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+{% endblock guests %}
+
+{% block customJS %}
+<script>
+    function scanQRCode() {
+        navigator.mediaDevices.getUserMedia({ video: true })
+        .then(function (stream) {
+            const video = document.createElement('video');
+            video.srcObject = stream;
+            video.play();
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+
+            const interval = setInterval(function () {
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const imageData = canvas.toDataURL('image/jpeg');
+
+                document.getElementById('image_data').value = imageData;
+            }, 100);
+        })
+        .catch(function (error) {
+            console.error('Error accessing camera:', error);
+        });
+    }
+</script>
+{% endblock customJS %}

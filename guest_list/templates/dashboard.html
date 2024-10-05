@@ -1,0 +1,694 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title> Admin | Dashboard </title>
+    <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
+
+    <!-- Fonts and icons -->
+    <script src="{% static 'assets/js/plugin/webfont/webfont.min.js' %}"></script>
+    <script>
+      WebFont.load({
+        google: { families: ["Public Sans:300,400,500,600,700"] },
+        custom: {
+          families: [
+            "Font Awesome 5 Solid",
+            "Font Awesome 5 Regular",
+            "Font Awesome 5 Brands",
+            "simple-line-icons",
+          ],
+          urls: ["{% static 'assets/css/fonts.min.css' %}"],
+        },
+        active: function () {
+          sessionStorage.fonts = true;
+        },
+      });
+    </script>
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="{% static 'assets/css/bootstrap.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'assets/css/plugins.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'assets/css/admin.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'assets/fontawesome/css/all.min.css' %}"/>
+    <link rel="stylesheet" href="{% static 'assets/DataTables/datatables.min.css' %}"/>
+  </head>
+  <body>
+    <div class="wrapper">
+
+      <!-- Sidebar -->
+      <div class="sidebar" data-background-color="dark">
+        <div class="sidebar-logo">
+          <!-- Logo Header -->
+          <div class="logo-header" data-background-color="dark">
+            <a href="#" class="logo">
+              <img
+                src="{% static 'assets/img/logo.png' %}"
+                alt="navbar brand"
+                class="navbar-brand"
+                height="60"
+              />
+            </a>
+            <div class="nav-toggle">
+              <button class="btn btn-toggle toggle-sidebar">
+                <i class="gg-menu-right"></i>
+              </button>
+              <button class="btn btn-toggle sidenav-toggler">
+                <i class="gg-menu-left"></i>
+              </button>
+            </div>
+            <button class="topbar-toggler more">
+              <i class="gg-more-vertical-alt"></i>
+            </button>
+          </div>
+          <!-- End Logo Header -->
+        </div>
+
+        <div class="sidebar-wrapper scrollbar scrollbar-inner">
+          <div class="sidebar-content">
+            <ul class="nav nav-secondary">
+              <li class="nav-item {% if request.path == '/' %}active{% endif %}">
+                <a href="{% url 'dashboard' %}">
+                  <i class="fas fa-home"></i>
+                  <p>Dashboard</p>
+                </a>
+                
+              </li>
+              <li class="nav-section">
+                <span class="sidebar-mini-icon">
+                  <i class="fa fa-ellipsis-h"></i>
+                </span>
+                <h4 class="text-section">Components</h4>
+              </li>
+              <li class="nav-item {% if request.path == '/dashboard/all-guests' %}active{% endif %}">
+                <a href="{% url 'all_guests' %}">
+                  <i class="fas fa-users"></i>
+                  <p>All Guests</p>
+                  <span class="badge badge-primary">{{ guest_count }}</span>
+                </a>
+              </li>
+              <li class="nav-item {% if request.path == '/dashboard/notified-guests' %}active{% endif %}">
+                <a href="{% url 'notified_guests' %}">
+                  <i class="fas fa-user-check"></i>
+                  <p>Notified Guests</p>
+                  <span class="badge badge-success">{{ notified_guest_count }}</span>
+                </a>
+              </li>             
+              <li class="nav-item {% if request.path == '/dashboard/not-notified-guests' %}active{% endif %}">
+                <a href="{% url 'not_notified_guests' %}">
+                  <i class="fas fa-user-xmark"></i>
+                  <p>Not Notified Guests</p>
+                  <span class="badge badge-danger">{{ not_notified_guest_count }}</span>
+                </a>
+              </li>   
+            </ul>
+          </div>
+        </div>
+
+      </div>
+      <!-- End Sidebar -->
+
+      <div class="main-panel">
+
+        <div class="main-header">
+          <div class="main-header-logo">
+            <!-- Logo Header -->
+            <div class="logo-header" data-background-color="dark">
+              <a href='' class="logo">
+                <img
+                  src="{% static 'assets/img/logo.png' %}"
+                  alt="navbar brand"
+                  class="navbar-brand"
+                  height="60"
+                />
+              </a>
+              <div class="nav-toggle">
+                <button class="btn btn-toggle toggle-sidebar">
+                  <i class="gg-menu-right"></i>
+                </button>
+                <button class="btn btn-toggle sidenav-toggler">
+                  <i class="gg-menu-left"></i>
+                </button>
+              </div>
+              <button class="topbar-toggler more">
+                <i class="gg-more-vertical-alt"></i>
+              </button>
+            </div>
+            <!-- End Logo Header -->
+          </div>
+          <!-- Navbar Header -->
+          <nav
+            class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom"
+          >
+            <div class="container-fluid">
+              <nav
+                class="navbar navbar-header-left navbar-expand-lg navbar-form nav-search p-0 d-none d-lg-flex"
+              >
+              <div class="d-flex align-items-center">
+                <h1 class="fw-bold">Admin Dashboard</h1>
+              </div>
+              </nav>
+
+              <form id='guestListForm' method="post" enctype="multipart/form-data" action="{% url 'import_guest_list' %}">
+                {% csrf_token %}
+                <ul class="navbar-nav topbar-nav ms-md-auto align-items-center me-3">
+                  <li class="nav-item topbar-user">
+                    <input type="file" name="guest_list" accept=".xlsx, .xls" required>
+                    <button type="submit" class="btn btn-secondary" id="importGuestList"> Import Guest List <i class="fa-solid fa-file-import"></i> </button> 
+                  </li>
+                </ul>
+              </form>
+            </div>
+          </nav>
+          <!-- End Navbar -->
+        </div>
+        
+        <div class="container">
+          <div class="page-inner">
+            {% block hero %}
+            <div class="row">
+
+              <div class="col-sm-6 col-md-4">
+                <div class="card card-stats card-round">
+                  <div class="card-body">
+                    <div class="row align-items-center">
+                      <div class="col-icon">
+                        <div
+                          class="icon-big text-center icon-primary bubble-shadow-small"
+                        >
+                          <i class="fas fa-users"></i>
+                        </div>
+                      </div>
+                      <div class="col col-stats ms-3 ms-sm-0">
+                        <div class="numbers">
+                          <p class="card-category">All Guests</p>
+                          <h4 class="card-title">{{ guest_count }}</h4>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-sm-6 col-md-4">
+                <div class="card card-stats card-round">
+                  <div class="card-body">
+                    <div class="row align-items-center">
+                      <div class="col-icon">
+                        <div
+                          class="icon-big text-center icon-success bubble-shadow-small"
+                        >
+                          <i class="fas fa-user-check"></i>
+                        </div>
+                      </div>
+                      <div class="col col-stats ms-3 ms-sm-0">
+                        <div class="numbers">
+                          <p class="card-category">Notified Guests</p>
+                          <h4 class="card-title">{{ notified_guest_count }}</h4>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-sm-6 col-md-4">
+                <div class="card card-stats card-round">
+                  <div class="card-body">
+                    <div class="row align-items-center">
+                      <div class="col-icon">
+                        <div
+                          class="icon-big text-center icon-danger bubble-shadow-small"
+                        >
+                          <i class="fas fa-user-xmark"></i>
+                        </div>
+                      </div>
+                      <div class="col col-stats ms-3 ms-sm-0">
+                        <div class="numbers">
+                          <p class="card-category">Not Notified Guests</p>
+                          <h4 class="card-title">{{ not_notified_guest_count }}</h4>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+            {% endblock hero %}
+
+           {% block guests %}
+            <div class="row">
+              <div class="col-md-12">
+                <div class="card card-round">
+                  <div class="card-header">
+                    <div class="card-head-row card-tools-still-right" >
+                      <h4 class="card-title">Guest List</h4>
+                      
+                      <div class="card-tools" style="display: flex; align-items: center;">
+                        <form action="{% url 'send_qr_to_all' %}" method="post" class="me-5" id="sendQRCodeForm">
+                          {% csrf_token %}
+                          <button type="submit" class="btn btn-primary" id="sendQRCode"> Send QR Code To All Guest </i> </button>
+                        </form>
+                        <button
+                          class="btn btn-icon btn-link btn-primary btn-xs btn-refresh-card"
+                          onclick=`window.location.href="{% url 'dashboard' %}"`;
+                        >
+                          <span class="fa fa-sync-alt"></span>
+                        </button>
+                          <div class="dropdown">
+                            <button
+                              class="btn btn-icon btn-clean me-0"
+                              type="button"
+                              id="dropdownMenuButton"
+                              data-bs-toggle="dropdown"
+                              aria-haspopup="true"
+                              aria-expanded="false"
+                            >
+                              <i class="fas fa-ellipsis-h"></i>
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                              <a class="dropdown-item" href="{% url 'export_to_excel' %}">Export to EXCEL</a>
+                            </div>
+                          </div>
+                      </div>
+                    </div>
+                      <p class="card-category">  </p>
+                  </div>
+                    <div class="card-body p-0 pb-3">
+                      <div class="table-responsive">
+                        {% if all_guests %}
+                          
+                        <div class="container-fluid">       
+                            <table class="table bg-light myTable" id="guestTable">
+                              <thead class="thead-light">
+                                <tr>
+                                  <th scope="col">#</th>
+                                  <th scope="col">First Name</th>
+                                  <th scope="col">Last Name</th>
+                                  <th scope="col">Email</th>
+                                  <th scope="col">Status</th>
+                                  <th scope="col">Send QR</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                              {% for guest in all_guests %}
+                                <tr>
+                                  <td>{{ forloop.counter }}</td>
+                                  <th>{{ guest.first_name }}</th>
+                                  <th>{{ guest.last_name }}</th>
+                                  <td>{{ guest.email }}</td>
+                                  {% if guest.status == 'not-sent' %}
+                                    <td><span class="badge badge-danger">Not Sent</span></td>
+                                    <td><button class="btn btn-primary btn-sm sendQR" data-id="{{ guest.id }}"> Send</button></td>
+                                    {% else %}
+                                    <td><span class="badge badge-success">Sent</span></td>
+                                    <td><button class="btn btn-dark btn-sm" disabled> Send</button></td>
+                                  {% endif %}
+                                </tr>
+                              {% endfor %}
+                              </tbody>
+                          </table>
+                        </div>
+                          
+                        {% else %}
+                        <div class="row my-5" style="padding: 50px 0">
+                            <h5 class="text-center">Your guest list is empty.</h5>
+                        </div>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+              </div>
+            </div>
+          
+          {% endblock guests %}  
+          </div>
+        </div>
+
+        <footer class="footer">
+          <div class="container-fluid d-flex justify-content-between">
+            <nav class="pull-left">
+              <ul class="nav">
+                <li class="nav-item">
+                  <span class="nav-link">
+                    All Rights Reserved &copy; <script> document.write(new Date().getFullYear()); </script>
+                  </span>
+                </li>
+              </ul>
+            </nav>
+            <div>
+              Developed by
+              <a target="_blank" href="https://www.wristbands.ng">Wristbands NG Web Team</a>.
+            </div>
+          </div>
+        </footer>
+      </div>
+
+    </div>
+    <!--   Core JS Files   -->
+    <script src="{% static 'assets/js/core/jquery-3.7.1.min.js' %}"></script>
+    <script src="{% static 'assets/js/core/popper.min.js' %}"></script>
+    <script src="{% static 'assets/js/core/bootstrap.min.js' %}"></script>
+
+    <!-- jQuery Scrollbar -->
+    <script src="{% static 'assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js' %}"></script>
+
+    <!-- jQuery Sparkline -->
+    <script src="{% static 'assets/js/plugin/jquery.sparkline/jquery.sparkline.min.js' %}"></script>
+
+    <!-- Datatables -->
+    <script src="{% static 'assets/DataTables/datatables.min.js' %}"></script>
+
+    <!-- Bootstrap Notify -->
+    <script src="{% static 'assets/js/plugin/bootstrap-notify/bootstrap-notify.min.js' %}"></script>
+
+    <!-- Sweet Alert -->
+    <script src="{% static 'assets/js/plugin/sweetalert/sweetalert.min.js' %}"></script>
+
+    <!--Page JS -->
+    <script src="{% static 'assets/js/admin.min.js' %}"></script>
+
+    <script>
+      //Notify
+      // $.notify({
+      //   icon: 'icon-bell',
+      //   title: 'Admin',
+      //   message: 'Admin Dashboard',
+      // },{
+      //   type: 'secondary',
+      //   placement: {
+      //     from: "bottom",
+      //     align: "right"
+      //   },
+      //   time: 1000,
+      // });
+
+      //Datatables 
+      const table = $('#guestTable').DataTable();
+
+      $('#guestListForm').on('submit', function(e) {
+          e.preventDefault();
+          const formData = new FormData(this);
+
+          $.ajax({
+              url: $(this).attr('action'),
+              type: 'POST',
+              data: formData,
+              processData: false,
+              contentType: false,
+              beforeSend: function(){
+                $('#importGuestList').html(`
+                    <div class='d-flex align-items-center justify-content-center'>
+                        <span class='spinner-border text-light' aria-hidden='true'></span>
+                        <span role='status' class="sr-only">importing...</span>
+                    </div>
+                `);
+              },
+              success: function(response) {
+                  if (response.status == 200){
+                    $.notify({
+                      icon: 'fa fa-circle-check',
+                      title: 'Guest List Import!',
+                      message: response.message,
+                    },{
+                      type: 'success',
+                      placement: {
+                        from: "top",
+                        align: "right"
+                      },
+                      time: 1000,
+                    });
+                    
+                    setTimeout(function() {
+                      window.location.href="{% url 'dashboard' %}";
+                    }, 1200);
+                  
+                    } else {
+                    $.notify({
+                      icon: 'fa fa-circle-xmark',
+                      title: 'File Not Import!',
+                      message: response.message,
+                    },{
+                      type: 'danger',
+                      placement: {
+                        from: "top",
+                        align: "right"
+                      },
+                      time: 1000,
+                    });
+                  }
+                    $('#importGuestList').text("Import Guest List");
+              },
+              error: function(xhr, status, error) {
+                  console.log('An error occurred: ' + xhr.responseText);
+                  console.error(error);
+              }
+          });
+      });
+      
+      // Send QR to individual
+      // $('.sendQR').click(function() {
+      //   const button = $(this);
+      //   const guestId = $(this).data('id');
+      //   $.ajax({
+      //     type: 'POST',
+      //     url: '{% url "send_qr_to_one" %}',
+      //     data: { id: guestId, csrfmiddlewaretoken: '{{ csrf_token }}' },
+      //     beforeSend: function(){
+      //       button.html(`
+      //         <div class='d-flex align-items-center justify-content-center'>
+      //           <span class='spinner-border text-light' aria-hidden='true'></span>
+      //           <span role='status' class="sr-only">sending...</span>
+      //         </div>
+      //       `);
+      //     },
+      //     success: function(response) {
+      //       if (response.status === 200) {
+      //         // Update the table row
+      //         const row = button.closest('tr');
+      //         row.find('.badge').removeClass('badge-danger').addClass('badge-success').text('Sent');
+      //         button.text("Resend QR").addClass('btn-dark').removeClass('btn-primary');
+      //         button.prop('disabled', true);
+      //         $.notify({
+      //           icon: 'fa fa-circle-check',
+      //           title: "QR Sent",
+      //           message: 'QR Code Sent Succesfully.',
+      //         },{
+      //           type: 'success',
+      //           placement: {
+      //             from: "top",
+      //             align: "right"
+      //           },
+      //           time: 1000,
+      //         });
+      //       } else if (response.status === 400) {
+      //         $.notify({
+      //           icon: 'fa fa-circle-xmark',
+      //           title: "QR Not Sent",
+      //           message: 'Guest already has QR sent.',
+      //         },{
+      //           type: 'warning',
+      //           placement: {
+      //             from: "top",
+      //             align: "right"
+      //           },
+      //           time: 1000,
+      //         });
+      //       } else {
+      //         // Handle other errors
+      //         $.notify({
+      //           icon: 'fa fa-circle-xmark',
+      //           title: "QR Not Sent",
+      //           message: 'An error occurred.',
+      //         },{
+      //           type: 'danger',
+      //           placement: {
+      //             from: "top",
+      //             align: "right"
+      //           },
+      //           time: 1000,
+      //         });
+      //       }
+      //       button.text("Send QR");
+      //       setTimeout(function() {
+      //         window.location.href="{% url 'dashboard' %}";
+      //       }, 1200);
+      //     },
+      //     error: function(error) {
+      //       $.notify({
+      //             icon: 'fa fa-circle-xmark',
+      //             title: "Something went wrong.",
+      //             message: error,
+      //           },{
+      //             type: 'danger',
+      //             placement: {
+      //               from: "top",
+      //               align: "right"
+      //             },
+      //             time: 1000,
+      //           });
+      //     }
+      //   });
+
+      // });
+
+      $('#guestTable').on('click', '.sendQR', function() {
+        const button = $(this);
+        const guestId = button.data('id');
+        // const currentUrl = window.location.href;
+
+        $.ajax({
+            type: 'POST',
+            url: '{% url "send_qr_to_one" %}',
+            data: { id: guestId, csrfmiddlewaretoken: '{{ csrf_token }}' },
+            beforeSend: function() {
+                button.html(`
+                    <div class='d-flex align-items-center justify-content-center'>
+                        <span class='spinner-border text-light' aria-hidden='true'></span>
+                        <span role='status' class="sr-only">Checking in...</span>
+                    </div>
+                `);
+            },
+            success: function(response) {
+              if (response.status === 200) {
+                  // Update the table row
+                  const row = button.closest('tr');
+                  row.find('.badge').removeClass('badge-danger').addClass('badge-success').text('Sent');
+                  button.text("Sent").addClass('btn-dark').removeClass('btn-primary');
+                  button.prop('disabled', true);
+                  $.notify({
+                    icon: 'fa fa-circle-check',
+                    title: "QR Sent",
+                    message: 'QR Code Sent Succesfully.',
+                  },{
+                    type: 'success',
+                    placement: {
+                      from: "top",
+                      align: "right"
+                    },
+                    time: 1000,
+                  });
+              } else if (response.status === 400) {
+                  $.notify({
+                    icon: 'fa fa-circle-xmark',
+                    title: "QR Not Sent",
+                    message: 'Guest already has QR sent.',
+                  },{
+                    type: 'warning',
+                    placement: {
+                      from: "top",
+                      align: "right"
+                    },
+                    time: 1000,
+                  });
+              } else {
+              // Handle other errors
+                  $.notify({
+                      icon: 'fa fa-circle-xmark',
+                      title: "QR Not Sent",
+                      message: 'An error occurred.',
+                    },{
+                      type: 'danger',
+                      placement: {
+                        from: "top",
+                        align: "right"
+                      },
+                      time: 1000,
+                    });
+              }
+                button.text("Send");
+                // setTimeout(function() {
+                //     window.location.href = currentUrl;
+                // }, 1200);
+            },
+            error: function(error) {
+                $.notify({
+                    icon: 'fa fa-circle-xmark',
+                    title: "Something went wrong.",
+                    message: error,
+                },{
+                    type: 'danger',
+                    placement: {
+                        from: "top",
+                        align: "right"
+                    },
+                    time: 1000,
+                });
+            }
+        });
+      });
+      
+      // Send QR code to all users
+      $('#sendQRCodeForm').on('submit', function(e) {
+        e.preventDefault();
+
+        $.ajax({
+              type: 'POST',
+              url: '{% url "send_qr_to_all" %}',
+              data: $(this).serialize(),
+              beforeSend: function() {
+                  $('#sendQRCode').html(`
+                      <div class='d-flex align-items-center justify-content-center'>
+                          <span class='spinner-border text-light' aria-hidden='true'></span>
+                          <span role='status' class="sr-only">Sending...</span>
+                      </div>
+                  `);
+              },
+              success: function(response) {
+                  if (response.status === 200) {
+                      $.notify({
+                          icon: 'fa fa-circle-check',
+                          title: "QR Codes Sent",
+                          message: response.message,
+                      }, {
+                          type: 'success',
+                          placement: {
+                              from: "top",
+                              align: "right"
+                          },
+                          time: 1000,
+                      });
+                      setTimeout(function() {
+                        window.location.href="{% url 'dashboard' %}";
+                      }, 1200);
+
+                } else {
+                      $.notify({
+                          icon: 'fa fa-circle-xmark',
+                          title: "QR Codes Not Sent",
+                          message: response.message,
+                      }, {
+                          type: 'danger',
+                          placement: {
+                              from: "top",
+                              align: "right"
+                          },
+                          time: 1000,
+                      });
+                  }
+                  $('#sendQRCode').html('Send QR Code To All Guests');
+              },
+              error: function(error) {
+                  $.notify({
+                      icon: 'fa fa-circle-xmark',
+                      title: "Something went wrong.",
+                      message: error.responseText,
+                  }, {
+                      type: 'danger',
+                      placement: {
+                          from: "top",
+                          align: "right"
+                      },
+                      time: 1000,
+                  });
+              }
+        });
+
+      });
+
+    </script>
+    {% block customJS %}
+    {% endblock customJS %}
+  </body>
+</html>
